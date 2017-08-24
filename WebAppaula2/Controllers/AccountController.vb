@@ -8,6 +8,8 @@ Imports Owin
 
 <Authorize>
 Public Class AccountController
+
+
     Inherits Controller
     Private _signInManager As ApplicationSignInManager
     Private _userManager As ApplicationUserManager
@@ -25,7 +27,7 @@ Public Class AccountController
             Return If(_signInManager, HttpContext.GetOwinContext().[Get](Of ApplicationSignInManager)())
         End Get
         Private Set
-            _signInManager = value
+            _signInManager = Value
         End Set
     End Property
 
@@ -34,7 +36,7 @@ Public Class AccountController
             Return If(_userManager, HttpContext.GetOwinContext().GetUserManager(Of ApplicationUserManager)())
         End Get
         Private Set
-            _userManager = value
+            _userManager = Value
         End Set
     End Property
 
@@ -58,7 +60,7 @@ Public Class AccountController
 
         ' Isso não conta falhas de login em relação ao bloqueio de conta
         ' Para ativar que falhas de senha acionem o bloqueio da conta, altere para shouldLockout := True
-        Dim result = Await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout := False)
+        Dim result = Await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout:=False)
         Select Case result
             Case SignInStatus.Success
                 Return RedirectToLocal(returnUrl)
@@ -104,7 +106,7 @@ Public Class AccountController
         ' Se um usuário inserir códigos incorretos para uma quantidade especificada de tempo, então a conta de usuário 
         ' será bloqueado por um período especificado de tempo. 
         ' Você pode configurar os ajustes de bloqueio da conta em IdentityConfig
-        Dim result = Await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent := model.RememberMe, rememberBrowser := model.RememberBrowser)
+        Dim result = Await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:=model.RememberMe, rememberBrowser:=model.RememberBrowser)
         Select Case result
             Case SignInStatus.Success
                 Return RedirectToLocal(model.ReturnUrl)
@@ -136,7 +138,7 @@ Public Class AccountController
             }
             Dim result = Await UserManager.CreateAsync(user, model.Password)
             If result.Succeeded Then
-                Await SignInManager.SignInAsync(user, isPersistent := False, rememberBrowser := False)
+                Await SignInManager.SignInAsync(user, isPersistent:=False, rememberBrowser:=False)
 
                 ' For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                 ' Enviar um email com este link
@@ -284,7 +286,7 @@ Public Class AccountController
         If Not Await SignInManager.SendTwoFactorCodeAsync(model.SelectedProvider) Then
             Return View("Error")
         End If
-        Return RedirectToAction("VerifyCode", New With { _
+        Return RedirectToAction("VerifyCode", New With {
             .Provider = model.SelectedProvider,
             .ReturnUrl = model.ReturnUrl,
             .RememberMe = model.RememberMe
@@ -301,7 +303,7 @@ Public Class AccountController
         End If
 
         ' Faça logon do usuário com este provedor de logon externo se o usuário já tiver um logon
-        Dim result = Await SignInManager.ExternalSignInAsync(loginInfo, isPersistent := False)
+        Dim result = Await SignInManager.ExternalSignInAsync(loginInfo, isPersistent:=False)
         Select Case result
             Case SignInStatus.Success
                 Return RedirectToLocal(returnUrl)
@@ -329,28 +331,28 @@ Public Class AccountController
     <ValidateAntiForgeryToken>
     Public Async Function ExternalLoginConfirmation(model As ExternalLoginConfirmationViewModel, returnUrl As String) As Task(Of ActionResult)
         If User.Identity.IsAuthenticated Then
-          Return RedirectToAction("Index", "Manage")
+            Return RedirectToAction("Index", "Manage")
         End If
 
         If ModelState.IsValid Then
-          ' Obter as informações sobre o usuário do provedor de logon externo
-          Dim info = Await AuthenticationManager.GetExternalLoginInfoAsync()
-          If info Is Nothing Then
-              Return View("ExternalLoginFailure")
-          End If
-          Dim userInfo = New ApplicationUser() With {
-              .UserName = model.Email,
-              .Email = model.Email
-          }
-          Dim result = Await UserManager.CreateAsync(userInfo)
-          If result.Succeeded Then
-            result = Await UserManager.AddLoginAsync(userInfo.Id, info.Login)
-            If result.Succeeded Then
-                Await SignInManager.SignInAsync(userInfo, isPersistent := False, rememberBrowser := False)
-                Return RedirectToLocal(returnUrl)
+            ' Obter as informações sobre o usuário do provedor de logon externo
+            Dim info = Await AuthenticationManager.GetExternalLoginInfoAsync()
+            If info Is Nothing Then
+                Return View("ExternalLoginFailure")
             End If
-          End If
-          AddErrors(result)
+            Dim userInfo = New ApplicationUser() With {
+                .UserName = model.Email,
+                .Email = model.Email
+            }
+            Dim result = Await UserManager.CreateAsync(userInfo)
+            If result.Succeeded Then
+                result = Await UserManager.AddLoginAsync(userInfo.Id, info.Login)
+                If result.Succeeded Then
+                    Await SignInManager.SignInAsync(userInfo, isPersistent:=False, rememberBrowser:=False)
+                    Return RedirectToLocal(returnUrl)
+                End If
+            End If
+            AddErrors(result)
         End If
 
         ViewData!ReturnUrl = returnUrl
@@ -388,7 +390,7 @@ Public Class AccountController
         MyBase.Dispose(disposing)
     End Sub
 
-    #Region "Auxiliares"
+#Region "Auxiliares"
     ' Usado para proteção XSRF ao adicionar logons externos
     Private Const XsrfKey As String = "XsrfId"
 
@@ -432,10 +434,10 @@ Public Class AccountController
                 .RedirectUri = RedirectUri
             }
             If UserId IsNot Nothing Then
-              properties.Dictionary(XsrfKey) = UserId
+                properties.Dictionary(XsrfKey) = UserId
             End If
             context.HttpContext.GetOwinContext().Authentication.Challenge(properties, LoginProvider)
         End Sub
     End Class
-    #End Region
+#End Region
 End Class
